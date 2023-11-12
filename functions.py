@@ -3,6 +3,8 @@ import numpy as np
 import random
 
 # Función para generar un array de gaussianos
+
+
 def gaussianRandom(n: int) -> np.array:
   # Genera los números base
   uniform = [random.random() for _ in range(n * 2)]
@@ -24,14 +26,20 @@ def arrMiddle(arr):
   return middle
 
 # Primer mitad del array
+
+
 def arrFirstHalf(arr):
   return arr[:arrMiddle(arr)]
 
 # Segunda mitad del array
+
+
 def arrSecondHalf(arr):
   return arr[arrMiddle(arr):]
 
 # Función que ordena
+
+
 def merge(arr, parts):
   # i = indice left array, j = indice right array, k = indice array a ordenar
   index = {'i': 0, 'j': 0, 'k': 0}
@@ -46,13 +54,13 @@ def merge(arr, parts):
     except IndexError:
       print(f"Error: index '{index}' not found")
 
-  while index['i'] < len(left) and index['j'] < len(right):        
+  while index['i'] < len(left) and index['j'] < len(right):
     arr[index['k']] = left[index['i']] if left[index['i']] < right[index['j']] else right[index['j']]
     increase('i') if left[index['i']] < right[index['j']] else increase('j')
     increase('k')
 
-  def step(key: str, part):    
-    while index[key] < len(part):      
+  def step(key: str, part):
+    while index[key] < len(part):
       arr[index['k']] = part[index[key]]
       increase(key)
       increase('k')
@@ -61,6 +69,8 @@ def merge(arr, parts):
   step('j', right)
 
 # Función que dispara los threads para el sort
+
+
 def mergeSort(arr):
   if len(arr) <= 1:
     return arr
@@ -83,14 +93,15 @@ def mergeSort(arr):
 
   merge(arr, parts)
 
+
 def bubbleSort(arr):
-	n = len(arr)
-	swapped = False
-	for i in range(n-1):
-		for j in range(0, n-i-1):
-			if arr[j] > arr[j + 1]:
-				swapped = True
-				arr[j], arr[j + 1] = arr[j + 1], arr[j]
-		
-		if not swapped:
-			return
+  n = len(arr)
+  swapped = False
+  for i in range(n - 1):
+    for j in range(0, n - i - 1):
+      if arr[j] > arr[j + 1]:
+        swapped = True
+        arr[j], arr[j + 1] = arr[j + 1], arr[j]
+
+    if not swapped:
+      return
