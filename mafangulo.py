@@ -60,6 +60,7 @@ def multi_threaded_merge_sort(arr, num_threads):
     for sublist in sorted_sublists[1:]:
         merged = merge(merged, sublist)
     return merged
+
 # Example usage
 input_list = [0] * 2000000
 for i in range(2000000):

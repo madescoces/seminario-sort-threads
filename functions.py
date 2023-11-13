@@ -3,8 +3,6 @@ import numpy as np
 import random
 
 # Función para generar un array de gaussianos
-
-
 def gaussianRandom(n: int) -> np.array:
   # Genera los números base
   uniform = [random.random() for _ in range(n * 2)]
@@ -19,33 +17,25 @@ def gaussianRandom(n: int) -> np.array:
 
   return gaussian
 
-
 # saca el indice medio de un array
 def arrMiddle(arr):
   middle = len(arr) // 2
   return middle
 
 # Primer mitad del array
-
-
 def arrFirstHalf(arr):
   return arr[:arrMiddle(arr)]
 
 # Segunda mitad del array
-
-
 def arrSecondHalf(arr):
   return arr[arrMiddle(arr):]
 
 # Función que ordena
+def merge(left, right):
+  arr = [0]*len(left+right)
 
-
-def merge(arr, parts):
   # i = indice left array, j = indice right array, k = indice array a ordenar
   index = {'i': 0, 'j': 0, 'k': 0}
-
-  left = parts[0]
-  right = parts[1]
 
   # Incrementa el indice i, j y k
   def increase(key: str):
@@ -67,46 +57,59 @@ def merge(arr, parts):
 
   step('i', left)
   step('j', right)
+  return arr
 
 # Función que dispara los threads para el sort
-
-
 def mergeSort(arr):
   if len(arr) <= 1:
     return arr
 
   # diccionario con los 2 threads por cada división
-  threads = {}
+  # threads = {}
 
   # Array con ambas partes
   parts = [arrFirstHalf(arr), arrSecondHalf(arr)]
+  parts = [mergeSort(part) for part in parts]
+  return merge(*parts)
 
-  # Crea los hilos
-  for i, part in enumerate(parts):
-    threads[i] = threading.Thread(target=mergeSort, args=(part,))
+  # # Crea los hilos
+  # for i, part in enumerate(parts):
+  #   threads[i] = threading.Thread(target=mergeSort, args=(part,))
 
-  # Dispara los hilos
-  [threads[th].start() for th in threads]
+  # # Dispara los hilos
+  # [threads[th].start() for th in threads]
 
-  # Espera a que finalicen todos para unirlos
-  [threads[th].join() for th in threads]
+  # # Espera a que finalicen todos para unirlos
+  # [threads[th].join() for th in threads]
 
-  merge(arr, parts)
+def merge_sort_threaded(arr, num_th):
+  if num_th <= 1:
+    return mergeSort(arr)
+  
+  sublists = []
+  size = len(arr) // num_th
+  for i in range(0,len(arr),size):
+    sublists.append(arr[i:i+size])
+  
+  sorted_sublists = []  
+  threads = []
+  for sublist in sublists:
+    thread = threading.Thread(target=lambda sublist: sorted_sublists.append(mergeSort(sublist)), args=(sublist,)) 
+    threads.append(thread)
+  
+  for thread in threads:        
+    thread.start()
+    
+  for thread in threads:        
+    thread.join()
 
+  merged = sorted_sublists[0]
+  for sublist in sorted_sublists[1:]:
+    merged = merge(merged, sublist)
+  return merged
 
-def bubbleSort(arr):
-  n = len(arr)
-  swapped = False
-  for i in range(n - 1):
-    for j in range(0, n - i - 1):
-      if arr[j] > arr[j + 1]:
-        swapped = True
-        arr[j], arr[j + 1] = arr[j + 1], arr[j]
-
-    if not swapped:
-      return
-data = gaussianRandom(10)
-mergeSort(data)
+data = gaussianRandom(16)
+print(merge_sort_threaded(data, 3))
 
 def bubbleSort(arr):
 	n = len(arr)
