@@ -7,10 +7,17 @@ from functions import decorator as dec
 class Sort:
   def __init__(self, **kwargs):
     self.threads = kwargs['threads'] if 'threads' in kwargs else 1
-
+    self.t1 = 0
+    self.t2 = 0
   # Abstracta polimorfica entre tipos de sorting
-  def sortMe(self, arr):
+  def sortMe(self, arr):    
     pass
+
+  def cores(self):
+    return self.threads
+  
+  def name(self):
+    return self.__class__.__name__
 
   # Devuelve el tamaño de cada parte del array que surge de dividir el mismo en la cantidad de procesos
   def _chunkSize(self, arr) -> int:
@@ -26,13 +33,16 @@ class Sort:
 
   # Inicia el sort
   def run(self, arr):
+    self.t1 = time.perf_counter()
     with multiprocessing.Pool(processes=self.threads) as pool:
       sorted_chunks = pool.map(self.sortMe, self._generateChunks(arr))
     return self._joinChunks(sorted_chunks)
 
   # Combina las partes de la lista ya ordenadas
   def _joinChunks(self, chunks: list) -> list:
-    return reduce(lambda res, sublist: self._merge(res, sublist), chunks[1:], chunks[0])
+    sorted_chunks = reduce(lambda res, sublist: self._merge(res, sublist), chunks[1:], chunks[0])
+    self.t2 = time.perf_counter()
+    return sorted_chunks
 
   # Une las listas ordenadas
   def _merge(self, left: list, right: list) -> list:
@@ -52,7 +62,16 @@ class Sort:
     result.extend(left[i:])
     result.extend(right[j:])
     return result
-
+  
+  def totalTime(self):
+    return self.t2 - self.t1
+  
+  def log(self):
+    return {
+      'name': self.name(),
+      'cores': self.cores(),
+      'time': self.totalTime()
+    }
 
 class MergeSort(Sort):
   def sortMe(self, arr):
@@ -115,10 +134,10 @@ class QuickSort(Sort):
 
 if __name__ == "__main__":
   # lista a ordenar
-  data = gss(300000)
+  data = gss(500000)
   
   t1 = time.perf_counter()
-  sortedArray = MergeSort(threads = 4).run(data)
+  sortedArray = BubbleSort(threads = 24).run(data)
   t2 = time.perf_counter()
 
   dec(100)
